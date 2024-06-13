@@ -1,19 +1,19 @@
 export default class Mediator {
-	observers: { event: string, callback: Function }[];
+  observers: { event: string; callback: Function }[];
 
-	constructor () {
-		this.observers = [];
-	}
+  constructor() {
+    this.observers = [];
+  }
 
-	on (event: string, callback: Function) {
-		this.observers.push({ event, callback });
-	}
+  on(event: string, callback: Function) {
+    this.observers.push({ event, callback });
+  }
 
-	async publish (event: string, data: any) {
-		for (const observer of this.observers) {
-			if (observer.event === event) {
-				await observer.callback(data);
-			}
-		}
-	}
+  async publish(event: string, data: any) {
+    for (const observer of this.observers) {
+      if (observer.event === event) {
+        await observer.callback(data);
+      }
+    }
+  }
 }

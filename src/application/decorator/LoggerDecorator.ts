@@ -1,13 +1,10 @@
-import Usecase from "../usecase/Usecase";
+import UseCase from "../usecase/UseCase";
 
-export default class LoggerDecorator implements Usecase {
+export default class LoggerDecorator implements UseCase {
+  constructor(readonly useCase: UseCase) {}
 
-	constructor (readonly usecase: Usecase) {
-	}
-
-	execute(input: any): Promise<any> {
-		console.log(input.userAgent);
-		return this.usecase.execute(input);
-	}
-
+  execute(input: any): Promise<any> {
+    console.log(input.userAgent);
+    return this.useCase.execute(input);
+  }
 }

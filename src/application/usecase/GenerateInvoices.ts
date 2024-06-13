@@ -1,41 +1,49 @@
-import ContractDatabaseRepository from "../../infra/repository/ContractDatabaseRepository";
-import ContractRepository from "../repository/ContractRepository";
-import Presenter from "../presenter/Presenter";
-import JsonPresenter from "../../infra/presenter/JsonPresenter";
-import Usecase from "./Usecase";
+import Invoice from "../../domain/Invoice";
 import Mediator from "../../infra/mediator/Mediator";
+import JsonPresenter from "../../infra/presenter/JsonPresenter";
+import Presenter from "../presenter/Presenter";
+import ContractRepository from "../repository/ContractRepository";
+import UseCase from "./UseCase";
 
-export default class GenerateInvoices implements Usecase {
+export default class GenerateInvoices implements UseCase {
+  constructor(
+    readonly contractRepository: ContractRepository,
+    readonly presenter: Presenter = new JsonPresenter(),
+    readonly mediator: Mediator = new Mediator()
+  ) {}
 
-	constructor (
-		readonly contractRepository: ContractRepository, 
-		readonly presenter: Presenter = new JsonPresenter(),
-		readonly mediator: Mediator = new Mediator()
-	) {
-	}
+  async execute(input: Input): Promise<Output[]> {
+    const output: Output[] = [];
+    const contracts = await this.contractRepository.list();
 
-	async execute (input: Input): Promise<any> {
-		const output: Output[] = [];
-		const contracts = await this.contractRepository.list();
-		for (const contract of contracts) {
-			const invoices = contract.generateInvoices(input.month, input.year, input.type);
-			for (const invoice of invoices) {
-				output.push({ date: invoice.date, amount: invoice.amount });
-			}
-		}
-		await this.mediator.publish("InvoicesGenerated", output);
-		return this.presenter.present(output);
-	}
+    for (const contract of contracts) {
+      const invoices: Invoice[] = contract.generateInvoices(
+        input.month,
+        input.year,
+        input.type
+      );
+
+      invoices.forEach((invoice) => {
+        output.push({
+          date: invoice.date,
+          amount: invoice.amount,
+        });
+      });
+    }
+
+    this.mediator.publish("InvoiceGenerated", output);
+    return this.presenter.present(output);
+  }
 }
 
-type Input = {
-	month: number,
-	year: number,
-	type: string,
-	format?: string
-}
+export type Input = {
+  month: number;
+  year: number;
+  type: "cash" | "accrual";
+  userAgent?: string;
+};
 
 export type Output = {
-	date: Date,
-	amount: number
-}
+  date: Date;
+  amount: number;
+};

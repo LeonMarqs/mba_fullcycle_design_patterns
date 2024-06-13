@@ -1,5 +1,3 @@
 export default class Invoice {
-
-	constructor (readonly date: Date, readonly amount: number) {
-	}
+  constructor(readonly amount: number, readonly date: Date) {}
 }
